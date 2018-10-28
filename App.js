@@ -1,9 +1,8 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableHighlight } from 'react-native';
+import { StyleSheet, Text, View, TouchableHighlight, Button } from 'react-native';
 
 const player1Turn = "Player 1 turn";
 const player2Turn = "Player 2 turn";
-
 
 export default class App extends React.Component {
   render() {
@@ -21,10 +20,11 @@ class TicTacToe extends React.Component {
     this.state = {
       board: new Array(9).fill(' '),
       player1Turn: true,
-      annouce: player1Turn
-    }
-
-     this.markBoard = this.markBoard.bind(this);
+      annouce: player1Turn,
+      freeze: false
+    };
+    this.markBoard = this.markBoard.bind(this);
+    this.resetGame = this.resetGame.bind(this);
   }
 
   markBoard(index) {
@@ -33,21 +33,69 @@ class TicTacToe extends React.Component {
       this.setState(prevState => {
         let newBoard = prevState.board;
         newBoard[index] = prevState.player1Turn ? "X" : "O";
-        let newAnnouce = prevState.player1Turn ? player1Turn : player2Turn;
         return {
           board: newBoard,
-          annouce: newAnnouce,
           player1Turn: !prevState.player1Turn
         };
-      })
+      });
     }
   }
 
   checkWinner() {
-    //Check each case 1 at time
-    //check row
-    //check col
-    //check diagonal
+    //check for cat
+    let board = this.state.board;
+    if(board.reduce((acc, curr) => {return acc + curr}).trim().length <= 2) return;
+
+    const possibleValues = ["X","O"];
+    let winnerValue;
+
+    possibleValues.forEach(value => {
+       if(checkRows(board, value)) winnerValue = value;
+       if(checkCols(board, value)) winnerValue = value;
+       if(checkDiag(board, value)) winnerValue = value;
+    });
+
+    if(winnerValue === possibleValues[0]) {
+      this.setState({freeze: true});
+      return possibleValues[0];
+    }
+    else if(winnerValue === possibleValues[1]) {
+      this.setState({freeze: true});
+      return possibleValues[1];
+    }
+  }
+
+  setAnnoucement(winner) {
+    let newAnnouce = "";
+    if(winner == 'X') {
+      newAnnouce = "Player 1 has won";
+    }
+    else if(winner == 'O') {
+      newAnnouce = "Player 2 has won";
+    }
+    else {
+      newAnnouce = this.state.player1Turn ? player1Turn : player2Turn;
+    }
+
+    this.setState({
+      annouce: newAnnouce
+    });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    //Necessary to make sure state has updated before checking winner
+    if(prevState.player1Turn != this.state.player1Turn) {
+      this.setAnnoucement(this.checkWinner());
+    }
+  }
+
+  resetGame() {
+    this.setState({
+      board: new Array(9).fill(' '),
+      player1Turn: true,
+      annouce: player1Turn,
+      freeze: false
+    });
   }
 
   render() {
@@ -55,12 +103,42 @@ class TicTacToe extends React.Component {
         <View>
           <Annoucement annouce={this.state.annouce}/>
           <View style={styles.board}>
-            {this.state.board.map((square, index) => <Square check={square} key={index} pos={index} press={this.markBoard}/>)}
+            {this.state.board.map((square, index) => <Square check={square} key={index} pos={index} press={!this.state.freeze && this.markBoard}/>)}
           </View>
+          <Button onPress={this.resetGame} title="Reset"/>
         </View>
     );
   }
 }
+
+function checkRows(board, value) {
+  for(let i = 0; i < board.length; i = i + 3){
+    if(value === board[i] && value === board[i + 1] && value === board[i + 2]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function checkCols(board, value) {
+  for(let i = 0; i < board.length / 3; i++) {
+    if(value === board[i] && value === board[i + 3] && value === board[i + 6]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function checkDiag(board, value) {
+  if(value === board[0] && value === board[4] && value === board[8]) {
+    return true;
+  }
+  else if(value === board[2] && value === board[4] && value === board[6]) {
+    return true;
+  }
+  return false;
+}
+
 
 function Annoucement(props) {
     return (
@@ -72,7 +150,7 @@ function Annoucement(props) {
 
 function Square(props) {
     return (
-      <TouchableHighlight style={styles.square} onPress={() => props.press(props.pos)}>
+      <TouchableHighlight style={styles.square} onPress={() => props.press && props.press(props.pos)}>
         <View style={styles.container}>
           <Text>{props.check}</Text>
         </View>
