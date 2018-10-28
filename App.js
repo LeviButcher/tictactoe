@@ -7,7 +7,7 @@ const player2Turn = "Player 2 turn";
 export default class App extends React.Component {
   render() {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, styles.screen]}>
         <TicTacToe />
       </View>
     );
@@ -42,7 +42,6 @@ class TicTacToe extends React.Component {
   }
 
   checkWinner() {
-    //check for cat
     let board = this.state.board;
     if(board.reduce((acc, curr) => {return acc + curr}).trim().length <= 2) return;
 
@@ -63,6 +62,11 @@ class TicTacToe extends React.Component {
       this.setState({freeze: true});
       return possibleValues[1];
     }
+    //Cat check
+    else if(board.every(value => value == "X" || value == "O")) {
+      this.setState({freeze: true});
+      return "cat";
+    }
   }
 
   setAnnoucement(winner) {
@@ -72,6 +76,9 @@ class TicTacToe extends React.Component {
     }
     else if(winner == 'O') {
       newAnnouce = "Player 2 has won";
+    }
+    else if(winner == 'cat') {
+      newAnnouce = "The game is a tie";
     }
     else {
       newAnnouce = this.state.player1Turn ? player1Turn : player2Turn;
@@ -105,7 +112,7 @@ class TicTacToe extends React.Component {
           <View style={styles.board}>
             {this.state.board.map((square, index) => <Square check={square} key={index} pos={index} press={!this.state.freeze && this.markBoard}/>)}
           </View>
-          <Button onPress={this.resetGame} title="Reset"/>
+          <Button onPress={this.resetGame} title="Reset" color='#444'/>
         </View>
     );
   }
@@ -143,7 +150,7 @@ function checkDiag(board, value) {
 function Annoucement(props) {
     return (
     <View style={styles.annoucement}>
-      <Text>{props.annouce}</Text>
+      <Text style={styles.annoucementText}>{props.annouce}</Text>
     </View>
   );
 }
@@ -152,13 +159,16 @@ function Square(props) {
     return (
       <TouchableHighlight style={styles.square} onPress={() => props.press && props.press(props.pos)}>
         <View style={styles.container}>
-          <Text>{props.check}</Text>
+          <Text style={styles.mark}>{props.check}</Text>
         </View>
       </ TouchableHighlight>
     );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+  },
+
   container: {
     display: 'flex',
     flex: 1,
@@ -167,7 +177,7 @@ const styles = StyleSheet.create({
   },
 
   board : {
-    backgroundColor:'#ccc',
+    backgroundColor:'#444',
     height:300,
     width:300,
     display: 'flex',
@@ -182,11 +192,25 @@ const styles = StyleSheet.create({
     height: '33%',
     borderWidth: StyleSheet.hairlineWidth,
     borderStyle: 'solid',
-    backgroundColor:'#0cc',
+    backgroundColor:'#444',
+  },
+
+  mark: {
+    fontSize: 50,
+    color: '#ccc'
   },
 
   annoucement :{
     height: 50,
-    backgroundColor:'#ccc',
+    backgroundColor:'#222',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+
+  annoucementText: {
+    fontSize: 30,
+    textAlign: 'center',
+    color:'#fff'
   }
 });

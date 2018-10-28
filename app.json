@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "helloworld",
+    "name": "TicTacToe",
     "description": "This project is really great.",
     "slug": "helloworld",
     "privacy": "public",
@@ -12,7 +12,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
