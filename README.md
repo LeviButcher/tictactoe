@@ -4,7 +4,7 @@ tictactoe in react-native
 **this project is completed**
 
 ## Functions
-* Play a game of tictactoe against another person
+* Play a game of tictactoe against another person (Not over the network, same phone)
 * reset button for game
 
 # Learned
